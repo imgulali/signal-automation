@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f0f0f" />
+    <title>Signal</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f0f0f'/%3E%3Cpath d='M5 22V16M12 26V10M19 22V6M26 16V10' stroke='%232962ff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Signal home">
+        <svg
+          class="brand-mark"
+          viewBox="0 0 32 32"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M5 22V16M12 26V10M19 22V6M26 16V10"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span>signal</span>
+      </a>
+    </header>
+    <div class="workspace">
+      <aside class="watchlist">
+        <div class="panel-heading">
+          <h2>Watchlist <span id="market-count" class="count">0</span></h2>
+          <button
+            class="icon-button"
+            id="add-market"
+            aria-label="Add market"
+            title="Add market"
+          >
+            +
+          </button>
+        </div>
+        <div class="watchlist-labels">
+          <span>MARKET</span><span>LAST PRICE</span>
+        </div>
+        <div id="markets"></div>
+        <button id="add-market-bottom" class="add-market-bottom">
+          + Add market
+        </button>
+      </aside>
+      <main>
+        <div class="page-heading">
+          <h1>Automations</h1>
+          <button id="new-rule" class="primary">
+            <span>+</span> New automation
+          </button>
+        </div>
+        <div class="stats">
+          <div>
+            <span class="stat-label">MARKETS</span
+            ><strong id="watching-stat">0</strong>
+          </div>
+          <div>
+            <span class="stat-label">ACTIVE RULES</span
+            ><strong id="active-stat">0</strong>
+          </div>
+          <div>
+            <span class="stat-label" title="Latest 200 events"
+              >WEBHOOKS SENT</span
+            ><strong id="sent-stat">0</strong>
+          </div>
+        </div>
+        <section class="rules-section">
+          <div class="section-heading">
+            <h2>Rules <span id="rule-count" class="count">0</span></h2>
+            <div class="filters" aria-label="Filter automations">
+              <button class="selected" data-filter="all">All</button
+              ><button data-filter="active">Active</button
+              ><button data-filter="paused">Paused</button>
+            </div>
+          </div>
+          <div id="rules"></div>
+        </section>
+        <section class="activity-section">
+          <div class="section-heading">
+            <h2>Activity</h2>
+          </div>
+          <div class="activity-table">
+            <div class="activity-head">
+              <span>EVENT / MARKET</span><span>TRIGGER PRICE</span
+              ><span>DELIVERY</span><span>TIME</span>
+            </div>
+            <div id="activity"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <dialog id="market-dialog">
+      <form id="market-form">
+        <div class="dialog-heading">
+          <div>
+            <h2>Add market</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        <label for="market-search">Market</label
+        ><input
+          id="market-search"
+          placeholder="Search SOL, BTC, ETH…"
+          autocomplete="off"
+        />
+        <div id="market-results" class="market-results"></div>
+        <p class="form-error" id="market-error" role="alert"></p>
+        <div class="dialog-footer">
+          <button type="button" class="secondary" data-close>Done</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="rule-dialog">
+      <form id="rule-form">
+        <div class="dialog-heading">
+          <div>
+            <h2 id="rule-dialog-title">New automation</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        <label for="rule-market">Market</label
+        ><select id="rule-market" required></select
+        ><label>When price</label>
+        <div class="condition-options">
+          <label
+            ><input type="radio" name="condition" value="above" checked /><span
+              ><b>↗</b> Above</span
+            ></label
+          ><label
+            ><input type="radio" name="condition" value="below" /><span
+              ><b>↘</b> Below</span
+            ></label
+          ><label
+            ><input type="radio" name="condition" value="crosses" /><span
+              ><b>⇅</b> Crosses either</span
+            ></label
+          >
+        </div>
+        <label for="rule-price"
+          >Target price <span id="price-unit" class="muted"></span></label
+        ><input
+          id="rule-price"
+          type="number"
+          min="0"
+          step="any"
+          placeholder="100.00"
+          required
+        />
+        <label for="rule-url">Webhook URL</label
+        ><input
+          id="rule-url"
+          type="url"
+          placeholder="https://your-endpoint.com/webhook"
+          maxlength="2048"
+          required
+        />
+        <div class="webhook-options">
+          <div class="webhook-field">
+            <label for="rule-headers"
+              >Headers <span class="muted">JSON · optional</span></label
+            >
+            <textarea
+              id="rule-headers"
+              rows="3"
+              maxlength="8192"
+              spellcheck="false"
+              placeholder='{"Authorization": "Bearer …"}'
+            ></textarea>
+          </div>
+          <div class="webhook-field">
+            <label for="rule-body"
+              >Body <span class="muted">JSON · optional</span></label
+            >
+            <textarea
+              id="rule-body"
+              rows="4"
+              maxlength="32768"
+              spellcheck="false"
+              placeholder="Default event payload"
+            ></textarea>
+          </div>
+        </div>
+        <p id="rule-error" class="form-error" role="alert"></p>
+        <div class="dialog-footer">
+          <button type="button" class="secondary" data-close>Cancel</button
+          ><button class="primary" id="save-rule" type="submit">Create</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="confirm-dialog">
+      <form method="dialog">
+        <div class="dialog-heading">
+          <h2 id="confirm-title">Remove item?</h2>
+          <button class="icon-button" value="cancel" aria-label="Close">
+            ×
+          </button>
+        </div>
+        <p id="confirm-message" class="muted"></p>
+        <div class="dialog-footer">
+          <button class="secondary" value="cancel">Cancel</button
+          ><button class="danger" value="confirm">Remove</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

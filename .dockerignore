@@ -1,0 +1,9 @@
+# Only application runtime files enter the build context.
+*
+!Dockerfile
+!package.json
+!index.ts
+!src/
+!src/**
+!web/
+!web/**

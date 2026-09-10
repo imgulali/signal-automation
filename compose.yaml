@@ -1,0 +1,14 @@
+services:
+  signal:
+    build: .
+    image: signal:local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${SIGNAL_PORT:-80}:8080"
+    volumes:
+      - signal-data:/app/data
+    stop_grace_period: 15s
+
+volumes:
+  signal-data:
